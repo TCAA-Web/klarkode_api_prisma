@@ -34,3 +34,4 @@ npm run contract:emit
 ```
 
 To use the framework's development server directly, run `npm run dev`. This direct mode requires `DATABASE_URL`.
+# klarkode_api_prisma
