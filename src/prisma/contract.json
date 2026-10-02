@@ -32,12 +32,8 @@
       "model": "Project",
       "namespace": "public"
     },
-    "routeSectionLabel": {
-      "model": "RouteSectionLabel",
-      "namespace": "public"
-    },
-    "topic": {
-      "model": "Topic",
+    "projectProgress": {
+      "model": "ProjectProgress",
       "namespace": "public"
     },
     "user": {
@@ -104,24 +100,16 @@
               }
             ]
           },
-          "PillVariant": {
+          "ProjectProgressStatus": {
             "codecId": "pg/text@1",
             "members": [
               {
-                "name": "default",
-                "value": "default"
+                "name": "in_progress",
+                "value": "in_progress"
               },
               {
-                "name": "soft",
-                "value": "soft"
-              },
-              {
-                "name": "dark",
-                "value": "dark"
-              },
-              {
-                "name": "light",
-                "value": "light"
+                "name": "completed",
+                "value": "completed"
               }
             ]
           },
@@ -139,23 +127,6 @@
               {
                 "name": "completed",
                 "value": "completed"
-              }
-            ]
-          },
-          "TopicColor": {
-            "codecId": "pg/text@1",
-            "members": [
-              {
-                "name": "coral",
-                "value": "coral"
-              },
-              {
-                "name": "yellow",
-                "value": "yellow"
-              },
-              {
-                "name": "lilac",
-                "value": "lilac"
               }
             ]
           },
@@ -351,13 +322,6 @@
                   "kind": "scalar"
                 }
               },
-              "overallProgressPct": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
               "startedAt": {
                 "nullable": false,
                 "type": {
@@ -450,9 +414,6 @@
                 "lastLessonId": {
                   "column": "lastLessonId"
                 },
-                "overallProgressPct": {
-                  "column": "overallProgressPct"
-                },
                 "startedAt": {
                   "column": "startedAt"
                 },
@@ -482,26 +443,6 @@
                   "plane": "domain"
                 }
               },
-              "badgeLabel": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "badgeVariant": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                },
-                "valueSet": {
-                  "entityKind": "enum",
-                  "entityName": "PillVariant",
-                  "namespaceId": "public",
-                  "plane": "domain"
-                }
-              },
               "classroomId": {
                 "nullable": true,
                 "type": {
@@ -524,20 +465,6 @@
                 }
               },
               "id": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "metaPrimary": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "metaSecondary": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -575,12 +502,6 @@
                 "artVariant": {
                   "column": "artVariant"
                 },
-                "badgeLabel": {
-                  "column": "badgeLabel"
-                },
-                "badgeVariant": {
-                  "column": "badgeVariant"
-                },
                 "classroomId": {
                   "column": "classroomId"
                 },
@@ -592,12 +513,6 @@
                 },
                 "id": {
                   "column": "id"
-                },
-                "metaPrimary": {
-                  "column": "metaPrimary"
-                },
-                "metaSecondary": {
-                  "column": "metaSecondary"
                 },
                 "title": {
                   "column": "title"
@@ -908,13 +823,6 @@
                   "kind": "scalar"
                 }
               },
-              "progressPercent": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
               "status": {
                 "nullable": false,
                 "type": {
@@ -989,9 +897,6 @@
                 },
                 "lessonId": {
                   "column": "lessonId"
-                },
-                "progressPercent": {
-                  "column": "progressPercent"
                 },
                 "status": {
                   "column": "status"
@@ -1119,40 +1024,6 @@
                   "plane": "domain"
                 }
               },
-              "progressPercent": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "statusLabel": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "tagLabel": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "tagVariant": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                },
-                "valueSet": {
-                  "entityKind": "enum",
-                  "entityName": "PillVariant",
-                  "namespaceId": "public",
-                  "plane": "domain"
-                }
-              },
               "title": {
                 "nullable": false,
                 "type": {
@@ -1161,7 +1032,23 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "progress": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "projectId"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectProgress",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "description": {
@@ -1176,18 +1063,6 @@
                 "numberVariant": {
                   "column": "numberVariant"
                 },
-                "progressPercent": {
-                  "column": "progressPercent"
-                },
-                "statusLabel": {
-                  "column": "statusLabel"
-                },
-                "tagLabel": {
-                  "column": "tagLabel"
-                },
-                "tagVariant": {
-                  "column": "tagVariant"
-                },
                 "title": {
                   "column": "title"
                 }
@@ -1196,52 +1071,8 @@
               "table": "project"
             }
           },
-          "RouteSectionLabel": {
+          "ProjectProgress": {
             "fields": {
-              "label": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "routePath": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              }
-            },
-            "relations": {},
-            "storage": {
-              "fields": {
-                "label": {
-                  "column": "label"
-                },
-                "routePath": {
-                  "column": "routePath"
-                }
-              },
-              "namespaceId": "public",
-              "table": "routeSectionLabel"
-            }
-          },
-          "Topic": {
-            "fields": {
-              "color": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                },
-                "valueSet": {
-                  "entityKind": "enum",
-                  "entityName": "TopicColor",
-                  "namespaceId": "public",
-                  "plane": "domain"
-                }
-              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -1249,39 +1080,105 @@
                   "kind": "scalar"
                 }
               },
-              "label": {
+              "progressPercent": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "projectId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "percent": {
+              "status": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "ProjectProgressStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "project": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "projectId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Project",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
-                "color": {
-                  "column": "color"
-                },
                 "id": {
                   "column": "id"
                 },
-                "label": {
-                  "column": "label"
+                "progressPercent": {
+                  "column": "progressPercent"
                 },
-                "percent": {
-                  "column": "percent"
+                "projectId": {
+                  "column": "projectId"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
                 }
               },
               "namespaceId": "public",
-              "table": "topic"
+              "table": "projectProgress"
             }
           },
           "User": {
@@ -1342,6 +1239,21 @@
                 },
                 "to": {
                   "model": "LessonProgress",
+                  "namespace": "public"
+                }
+              },
+              "projectProgress": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectProgress",
                   "namespace": "public"
                 }
               },
@@ -1668,15 +1580,6 @@
                   "nativeType": "text",
                   "nullable": true
                 },
-                "overallProgressPct": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": 0
-                  },
-                  "nativeType": "int4",
-                  "nullable": false
-                },
                 "startedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -1805,11 +1708,6 @@
                   "expression": "\"artVariant\" IN ('coral', 'yellow', 'lilac')",
                   "name": "course_artVariant_check_acc9898d",
                   "prefix": "course_artVariant_check"
-                },
-                {
-                  "expression": "\"badgeVariant\" IN ('default', 'soft', 'dark', 'light')",
-                  "name": "course_badgeVariant_check_4b0014d7",
-                  "prefix": "course_badgeVariant_check"
                 }
               ],
               "columns": {
@@ -1820,22 +1718,6 @@
                   "valueSet": {
                     "entityKind": "valueSet",
                     "entityName": "ArtVariant",
-                    "namespaceId": "public",
-                    "plane": "storage"
-                  }
-                },
-                "badgeLabel": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "badgeVariant": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false,
-                  "valueSet": {
-                    "entityKind": "valueSet",
-                    "entityName": "PillVariant",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
@@ -1860,16 +1742,6 @@
                   "nullable": false
                 },
                 "id": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "metaPrimary": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "metaSecondary": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -2116,15 +1988,6 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "progressPercent": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "kind": "literal",
-                    "value": 0
-                  },
-                  "nativeType": "int4",
-                  "nullable": false
-                },
                 "status": {
                   "codecId": "pg/text@1",
                   "default": {
@@ -2284,11 +2147,6 @@
                   "expression": "\"numberVariant\" IN ('coral', 'yellow', 'lilac')",
                   "name": "project_numberVariant_check_405572dc",
                   "prefix": "project_numberVariant_check"
-                },
-                {
-                  "expression": "\"tagVariant\" IN ('default', 'soft', 'dark', 'light')",
-                  "name": "project_tagVariant_check_62770856",
-                  "prefix": "project_tagVariant_check"
                 }
               ],
               "columns": {
@@ -2318,32 +2176,6 @@
                     "plane": "storage"
                   }
                 },
-                "progressPercent": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": true
-                },
-                "statusLabel": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "tagLabel": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "tagVariant": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false,
-                  "valueSet": {
-                    "entityKind": "valueSet",
-                    "entityName": "PillVariant",
-                    "namespaceId": "public",
-                    "plane": "storage"
-                  }
-                },
                 "title": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -2365,72 +2197,131 @@
                 }
               ]
             },
-            "routeSectionLabel": {
-              "columns": {
-                "label": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "routePath": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                }
-              },
-              "foreignKeys": [],
-              "indexes": [],
-              "primaryKey": {
-                "columns": [
-                  "routePath"
-                ]
-              },
-              "uniques": []
-            },
-            "topic": {
+            "projectProgress": {
               "checks": [
                 {
-                  "expression": "\"color\" IN ('coral', 'yellow', 'lilac')",
-                  "name": "topic_color_check_f8455733",
-                  "prefix": "topic_color_check"
+                  "expression": "\"status\" IN ('in_progress', 'completed')",
+                  "name": "projectProgress_status_check_d625c9f0",
+                  "prefix": "projectProgress_status_check"
                 }
               ],
               "columns": {
-                "color": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false,
-                  "valueSet": {
-                    "entityKind": "valueSet",
-                    "entityName": "TopicColor",
-                    "namespaceId": "public",
-                    "plane": "storage"
-                  }
-                },
                 "id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
-                "label": {
+                "progressPercent": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "projectId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
-                "percent": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "in_progress"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "ProjectProgressStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
                   "nullable": false
                 }
               },
-              "foreignKeys": [],
-              "indexes": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "projectProgress"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "projectId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "projectProgress"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "project"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "projectId"
+                  ],
+                  "name": "projectProgress_projectId_idx_a96e4d92",
+                  "prefix": "projectProgress_projectId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "projectProgress_userId_idx_a489d58a",
+                  "prefix": "projectProgress_userId_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "userId",
+                    "projectId"
+                  ]
+                }
+              ]
             },
             "user": {
               "columns": {
@@ -2663,13 +2554,11 @@
                 "completed"
               ]
             },
-            "PillVariant": {
+            "ProjectProgressStatus": {
               "kind": "valueSet",
               "values": [
-                "default",
-                "soft",
-                "dark",
-                "light"
+                "in_progress",
+                "completed"
               ]
             },
             "SubscriptionStatus": {
@@ -2678,14 +2567,6 @@
                 "active",
                 "paused",
                 "completed"
-              ]
-            },
-            "TopicColor": {
-              "kind": "valueSet",
-              "values": [
-                "coral",
-                "yellow",
-                "lilac"
               ]
             },
             "ValidationCheckType": {
@@ -2718,10 +2599,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6a29caa4f97433c3d7424d9de1a86895aac9a429c1f32a194c88e5a20b9e87f2"
+    "storageHash": "59ec135e9fe0f92e27883e0ce342f55b55140909b28064735f29f3d7c40eba09"
   },
   "execution": {
-    "executionHash": "86144e59ca423ec7d868a43fef7356d974d4092c35b42c7bcdc221e3d472e1a3",
+    "executionHash": "1797451ae9eec53b6e5de919c9d3ff1aa82e2c1827a2f908cfaaa45e8ddd594a",
     "mutations": {
       "defaults": [
         {
@@ -2755,6 +2636,17 @@
             "column": "id",
             "namespace": "public",
             "table": "lessonValidation"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "projectProgress"
           }
         },
         {

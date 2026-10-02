@@ -1,19 +1,6 @@
 // use prisma-8
 
-enum PillVariant {
-  default
-  soft
-  dark
-  light
-}
-
 enum ArtVariant {
-  coral
-  yellow
-  lilac
-}
-
-enum TopicColor {
   coral
   yellow
   lilac
@@ -34,6 +21,11 @@ enum SubscriptionStatus {
 enum LessonProgressStatus {
   locked
   current
+  completed
+}
+
+enum ProjectProgressStatus {
+  in_progress
   completed
 }
 
@@ -61,11 +53,7 @@ model Course {
   id            String      @id
   title         String
   description   String
-  badgeLabel    String
-  badgeVariant  PillVariant
   artVariant    ArtVariant
-  metaPrimary   String
-  metaSecondary String
   featured      Boolean     @default(false)
   classroomId   String?     @unique
   classroom     Classroom?  @relation(fields: [classroomId], references: [id])
@@ -138,13 +126,6 @@ model ValidationCheck {
   @@unique([validationId, sortOrder])
 }
 
-model Topic {
-  id      String     @id
-  label   String
-  percent Int
-  color   TopicColor
-}
-
 model User {
   id             String                  @id
   email          String                  @unique
@@ -152,6 +133,7 @@ model User {
   name           String
   subscriptions  ClassroomSubscription[]
   lessonProgress LessonProgress[]
+  projectProgress ProjectProgress[]
   createdAt      TimestamptzString       @default(now())
   updatedAt      TimestamptzString       @default(now())
 }
@@ -164,7 +146,6 @@ model ClassroomSubscription {
   startedAt           TimestamptzString   @default(now())
   completedAt         TimestamptzString?
   lastLessonId        String?
-  overallProgressPct  Int                 @default(0)
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   classroom           Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   lastLesson          Lesson?             @relation(fields: [lastLessonId], references: [id])
@@ -177,7 +158,6 @@ model LessonProgress {
   userId              String
   lessonId            String
   status              LessonProgressStatus  @default(locked)
-  progressPercent     Int                   @default(0)
   bestSubmissionCode  String?
   lastFeedbackMessage String?
   lastAttemptAt       TimestamptzString?
@@ -192,15 +172,20 @@ model Project {
   id              String      @id
   number          String      @unique
   numberVariant   ArtVariant
-  tagLabel        String
-  tagVariant      PillVariant
   title           String
   description     String
-  progressPercent Int?
-  statusLabel     String
+  progress        ProjectProgress[]
 }
 
-model RouteSectionLabel {
-  routePath String @id
-  label     String
+model ProjectProgress {
+  id              String                @id @default(uuid())
+  userId          String
+  projectId       String
+  status          ProjectProgressStatus @default(in_progress)
+  progressPercent Int                   @default(0)
+  updatedAt       TimestamptzString     @default(now())
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project         Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
 }

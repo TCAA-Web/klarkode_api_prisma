@@ -10,11 +10,7 @@ const courses = [
     title: "Frontend fundament",
     description:
       "HTML, CSS og JavaScript fra første tag til interaktiv oplevelse.",
-    badgeLabel: "I GANG",
-    badgeVariant: "default",
     artVariant: "coral",
-    metaPrimary: "12 emner",
-    metaSecondary: "65% færdig",
     featured: true,
     classroomId: "HTML_CLASSROOM",
   },
@@ -23,11 +19,7 @@ const courses = [
     title: "UX i praksis",
     description:
       "Design flows, prototyper og løsninger, mennesker faktisk kan bruge.",
-    badgeLabel: "NYT",
-    badgeVariant: "soft",
     artVariant: "yellow",
-    metaPrimary: "8 emner",
-    metaSecondary: "4 projekter",
     featured: false,
     classroomId: "FLEX_CLASSROOM",
   },
@@ -36,11 +28,7 @@ const courses = [
     title: "JavaScript logik",
     description:
       "Arbejd med funktioner, betingelser og datastrukturer, der gør din UI interaktiv.",
-    badgeLabel: "KLAR",
-    badgeVariant: "soft",
     artVariant: "lilac",
-    metaPrimary: "9 emner",
-    metaSecondary: "3 øvelser",
     featured: false,
     classroomId: "JS_CLASSROOM",
   },
@@ -667,42 +655,21 @@ const validationChecks = [
   },
 ];
 
-const topics = [
-  { id: "html-css", label: "HTML & CSS", percent: 65, color: "coral" },
-  { id: "javascript", label: "JavaScript", percent: 0, color: "yellow" },
-  { id: "ux", label: "UX i praksis", percent: 0, color: "lilac" },
-];
-
 const projects = [
   {
     id: "giv-siden-nyt-liv",
     number: "01",
     numberVariant: "coral",
-    tagLabel: "IGANG",
-    tagVariant: "dark",
     title: "Giv din gamle side nyt liv",
     description: "Analyse · Idé · Første prototype",
-    progressPercent: 35,
-    statusLabel: "35%",
   },
   {
     id: "design-til-en-bruger",
     number: "02",
     numberVariant: "yellow",
-    tagLabel: "NY",
-    tagVariant: "soft",
     title: "Design til en rigtig bruger",
     description: "Interview · Wireframe · Test",
-    progressPercent: null,
-    statusLabel: "Ikke startet",
   },
-];
-
-const routeSectionLabels = [
-  { routePath: "/", label: "HTML & CSS" },
-  { routePath: "/lessons", label: "HTML & CSS" },
-  { routePath: "/overview", label: "Alle kurser" },
-  { routePath: "/projects", label: "Projektværksted" },
 ];
 
 const users = [
@@ -711,88 +678,6 @@ const users = [
     email: "ada@klarkode.dk",
     username: "ada",
     name: "Ada Lovelace",
-  },
-];
-
-const classroomSubscriptions = [
-  {
-    id: "subscription-ada-html",
-    userId: "ada-lovelace",
-    classroomId: "HTML_CLASSROOM",
-    status: "active",
-    lastLessonId: "html-class-attribute",
-    overallProgressPct: 67,
-  },
-  {
-    id: "subscription-ada-js",
-    userId: "ada-lovelace",
-    classroomId: "JS_CLASSROOM",
-    status: "active",
-    lastLessonId: "javascript-greet-user",
-    overallProgressPct: 35,
-  },
-];
-
-const lessonProgress = [
-  {
-    id: "progress-ada-html-1",
-    userId: "ada-lovelace",
-    lessonId: "html-container-grouping",
-    status: "completed",
-    progressPercent: 100,
-    lastFeedbackMessage: "✓ Korrekt! Opgaven er bestået.",
-  },
-  {
-    id: "progress-ada-html-2",
-    userId: "ada-lovelace",
-    lessonId: "html-class-attribute",
-    status: "current",
-    progressPercent: 65,
-    bestSubmissionCode: `<div class="cards">
-  <div class="card">01</div>
-  <div class="card">02</div>
-  <div class="card">03</div>
-</div>`,
-    lastFeedbackMessage: 'Containeren skal have class="cards".',
-  },
-  {
-    id: "progress-ada-html-3",
-    userId: "ada-lovelace",
-    lessonId: "html-semantic-structure",
-    status: "locked",
-    progressPercent: 0,
-    lastFeedbackMessage: null,
-  },
-  {
-    id: "progress-ada-js-1",
-    userId: "ada-lovelace",
-    lessonId: "javascript-greet-user",
-    status: "current",
-    progressPercent: 35,
-    bestSubmissionCode:
-      `function createGreeting(name) {
-  return ` +
-      '"Hej, ${name}!"' +
-      `;
-}`,
-    lastFeedbackMessage:
-      "Funktionen skal returnere Hej, Ada! når navnet er Ada.",
-  },
-  {
-    id: "progress-ada-js-2",
-    userId: "ada-lovelace",
-    lessonId: "javascript-conditional-status",
-    status: "locked",
-    progressPercent: 0,
-    lastFeedbackMessage: null,
-  },
-  {
-    id: "progress-ada-js-3",
-    userId: "ada-lovelace",
-    lessonId: "javascript-array-join",
-    status: "locked",
-    progressPercent: 0,
-    lastFeedbackMessage: null,
   },
 ];
 
@@ -841,14 +726,6 @@ async function runSeed(): Promise<void> {
     });
   }
 
-  for (const topic of topics) {
-    await db.orm.public.Topic.upsert({
-      create: topic,
-      update: topic,
-      conflictOn: { id: topic.id },
-    });
-  }
-
   for (const project of projects) {
     await db.orm.public.Project.upsert({
       create: project,
@@ -857,35 +734,11 @@ async function runSeed(): Promise<void> {
     });
   }
 
-  for (const sectionLabel of routeSectionLabels) {
-    await db.orm.public.RouteSectionLabel.upsert({
-      create: sectionLabel,
-      update: sectionLabel,
-      conflictOn: { routePath: sectionLabel.routePath },
-    });
-  }
-
   for (const user of users) {
     await db.orm.public.User.upsert({
       create: user,
       update: user,
       conflictOn: { id: user.id },
-    });
-  }
-
-  for (const subscription of classroomSubscriptions) {
-    await db.orm.public.ClassroomSubscription.upsert({
-      create: subscription,
-      update: subscription,
-      conflictOn: { id: subscription.id },
-    });
-  }
-
-  for (const progress of lessonProgress) {
-    await db.orm.public.LessonProgress.upsert({
-      create: progress,
-      update: progress,
-      conflictOn: { id: progress.id },
     });
   }
 }

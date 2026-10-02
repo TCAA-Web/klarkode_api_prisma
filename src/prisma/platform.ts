@@ -1,29 +1,18 @@
 import { db } from "./db.ts";
 import { seed } from "./seed.ts";
 
-function unwrapJsonScalar<T>(value: T): T | null {
-  if (value && typeof value === "object" && "value" in value) {
-    return (value as { value: T }).value ?? null;
-  }
-
-  return value ?? null;
-}
-
 export async function getPlatformSnapshot(userId = "ada-lovelace") {
   await seed();
 
   const [
     users,
-    topics,
     projects,
-    routeSectionLabels,
     courses,
     classrooms,
     lessons,
-    validations,
-    validationChecks,
     subscriptions,
     progressRecords,
+    projectProgressRecords,
   ] = await Promise.all([
     db.orm.public.User.select(
       "id",
@@ -33,28 +22,18 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
       "createdAt",
       "updatedAt",
     ).all(),
-    db.orm.public.Topic.select("id", "label", "percent", "color").all(),
     db.orm.public.Project.select(
       "id",
       "number",
       "numberVariant",
-      "tagLabel",
-      "tagVariant",
       "title",
       "description",
-      "progressPercent",
-      "statusLabel",
     ).all(),
-    db.orm.public.RouteSectionLabel.select("routePath", "label").all(),
     db.orm.public.Course.select(
       "id",
       "title",
       "description",
-      "badgeLabel",
-      "badgeVariant",
       "artVariant",
-      "metaPrimary",
-      "metaSecondary",
       "featured",
       "classroomId",
     ).all(),
@@ -80,26 +59,6 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
       "objective",
       "successCriteria",
     ).all(),
-    db.orm.public.LessonValidation.select("id", "lessonId", "kind").all(),
-    db.orm.public.ValidationCheck.select(
-      "id",
-      "validationId",
-      "sortOrder",
-      "type",
-      "selector",
-      "property",
-      "value",
-      "parent",
-      "child",
-      "count",
-      "attribute",
-      "text",
-      "expectedTag",
-      "name",
-      "args",
-      "expected",
-      "message",
-    ).all(),
     db.orm.public.ClassroomSubscription.where({ userId })
       .select(
         "id",
@@ -109,7 +68,6 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
         "startedAt",
         "completedAt",
         "lastLessonId",
-        "overallProgressPct",
       )
       .all(),
     db.orm.public.LessonProgress.where({ userId })
@@ -118,43 +76,18 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
         "userId",
         "lessonId",
         "status",
-        "progressPercent",
         "bestSubmissionCode",
         "lastFeedbackMessage",
         "lastAttemptAt",
         "completedAt",
       )
       .all(),
+    db.orm.public.ProjectProgress.where({ userId })
+      .select("id", "userId", "projectId", "status", "progressPercent")
+      .all(),
   ]);
 
   const user = users.find((candidate) => candidate.id === userId) ?? null;
-
-  const sortedChecks = [...validationChecks].sort(
-    (left, right) => left.sortOrder - right.sortOrder,
-  );
-  const checksByValidationId = new Map<
-    string,
-    (typeof sortedChecks)[number][]
-  >();
-
-  for (const check of sortedChecks) {
-    const existing = checksByValidationId.get(check.validationId) ?? [];
-    existing.push({
-      ...check,
-      expected: unwrapJsonScalar(check.expected),
-    });
-    checksByValidationId.set(check.validationId, existing);
-  }
-
-  const validationsByLessonId = new Map(
-    validations.map((validation) => [
-      validation.lessonId,
-      {
-        ...validation,
-        checks: checksByValidationId.get(validation.id) ?? [],
-      },
-    ]),
-  );
 
   const progressByLessonId = new Map(
     progressRecords.map((progress) => [progress.lessonId, progress]),
@@ -168,7 +101,6 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
     const existing = lessonsByClassroomId.get(lesson.classroomId) ?? [];
     existing.push({
       ...lesson,
-      validation: validationsByLessonId.get(lesson.id) ?? null,
       progress: progressByLessonId.get(lesson.id) ?? null,
     });
     lessonsByClassroomId.set(lesson.classroomId, existing);
@@ -181,11 +113,26 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
     ]),
   );
 
-  const classroomsWithLessons = classrooms.map((classroom) => ({
-    ...classroom,
-    subscription: subscriptionsByClassroomId.get(classroom.id) ?? null,
-    lessons: lessonsByClassroomId.get(classroom.id) ?? [],
-  }));
+  const classroomsWithLessons = classrooms.map((classroom) => {
+    const classroomLessons = lessons.filter(
+      (lesson) => lesson.classroomId === classroom.id,
+    );
+    const completed = classroomLessons.filter(
+      (lesson) => progressByLessonId.get(lesson.id)?.status === "completed",
+    ).length;
+    const total = classroomLessons.length;
+
+    return {
+      ...classroom,
+      subscription: subscriptionsByClassroomId.get(classroom.id) ?? null,
+      lessons: lessonsByClassroomId.get(classroom.id) ?? [],
+      progress: {
+        completed,
+        total,
+        percent: total === 0 ? 0 : Math.round((completed / total) * 100),
+      },
+    };
+  });
 
   const classroomsById = new Map(
     classroomsWithLessons.map((classroom) => [classroom.id, classroom]),
@@ -198,12 +145,18 @@ export async function getPlatformSnapshot(userId = "ada-lovelace") {
       : null,
   }));
 
+  const projectProgressById = new Map(
+    projectProgressRecords.map((progress) => [progress.projectId, progress]),
+  );
+  const projectsWithProgress = projects.map((project) => ({
+    ...project,
+    progress: projectProgressById.get(project.id) ?? null,
+  }));
+
   return {
     user,
     users,
-    topics,
-    projects,
-    sectionLabels: routeSectionLabels,
+    projects: projectsWithProgress,
     subscriptions,
     lessonProgress: progressRecords,
     classrooms: classroomsWithLessons,
