@@ -1,21 +1,206 @@
 // use prisma-8
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum PillVariant {
+  default
+  soft
+  dark
+  light
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum ArtVariant {
+  coral
+  yellow
+  lilac
+}
+
+enum TopicColor {
+  coral
+  yellow
+  lilac
+}
+
+enum Difficulty {
+  beginner
+  intermediate
+  advanced
+}
+
+enum SubscriptionStatus {
+  active
+  paused
+  completed
+}
+
+enum LessonProgressStatus {
+  locked
+  current
+  completed
+}
+
+enum ValidationKind {
+  html
+  css
+  javascript
+}
+
+enum ValidationCheckType {
+  hasElement
+  hasClass
+  hasChild
+  hasChildrenCount
+  hasAttribute
+  textIncludes
+  semanticTag
+  hasDeclaration
+  definesFunction
+  returnsExpected
+  includesText
+}
+
+model Course {
+  id            String      @id
+  title         String
+  description   String
+  badgeLabel    String
+  badgeVariant  PillVariant
+  artVariant    ArtVariant
+  metaPrimary   String
+  metaSecondary String
+  featured      Boolean     @default(false)
+  classroomId   String?     @unique
+  classroom     Classroom?  @relation(fields: [classroomId], references: [id])
+}
+
+model Classroom {
+  id         String   @id
+  topicLabel String
+  artVariant ArtVariant
+  course     Course?
+  lessons    Lesson[]
+  subscribers ClassroomSubscription[]
+}
+
+model Lesson {
+  id               String            @id
+  classroomId      String
+  sortOrder        Int
+  topicTag         String
+  title            String
+  stepLabel        String
+  stepTitle        String
+  instructions     String
+  hintTitle        String
+  hintBody         String
+  taskTitle        String
+  completedText    String
+  taskDescription  String
+  starterCode      String
+  difficulty       Difficulty
+  estimatedMinutes Int
+  tags             String[]
+  objective        String
+  successCriteria  String[]
+  classroom        Classroom         @relation(fields: [classroomId], references: [id])
+  validation       LessonValidation?
+  progressRecords  LessonProgress[]
+
+  @@unique([classroomId, sortOrder])
+}
+
+model LessonValidation {
+  id      String            @id @default(uuid())
+  lessonId String           @unique
+  kind    ValidationKind
+  lesson  Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  checks  ValidationCheck[]
+}
+
+model ValidationCheck {
+  id            String              @id @default(uuid())
+  validationId  String
+  sortOrder     Int
+  type          ValidationCheckType
+  selector      String?
+  property      String?
+  value         String?
+  parent        String?
+  child         String?
+  count         Int?
+  attribute     String?
+  text          String?
+  expectedTag   String?
+  name          String?
+  args          Json?
+  expected      Json?
+  message       String
+  validation    LessonValidation    @relation(fields: [validationId], references: [id], onDelete: Cascade)
+
+  @@unique([validationId, sortOrder])
+}
+
+model Topic {
+  id      String     @id
+  label   String
+  percent Int
+  color   TopicColor
+}
+
+model User {
+  id             String                  @id
+  email          String                  @unique
+  username       String?                 @unique
+  name           String
+  subscriptions  ClassroomSubscription[]
+  lessonProgress LessonProgress[]
+  createdAt      TimestamptzString       @default(now())
+  updatedAt      TimestamptzString       @default(now())
+}
+
+model ClassroomSubscription {
+  id                  String              @id @default(uuid())
+  userId              String
+  classroomId         String
+  status              SubscriptionStatus  @default(active)
+  startedAt           TimestamptzString   @default(now())
+  completedAt         TimestamptzString?
+  lastLessonId        String?
+  overallProgressPct  Int                 @default(0)
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom           Classroom           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  lastLesson          Lesson?             @relation(fields: [lastLessonId], references: [id])
+
+  @@unique([userId, classroomId])
+}
+
+model LessonProgress {
+  id                  String                @id @default(uuid())
+  userId              String
+  lessonId            String
+  status              LessonProgressStatus  @default(locked)
+  progressPercent     Int                   @default(0)
+  bestSubmissionCode  String?
+  lastFeedbackMessage String?
+  lastAttemptAt       TimestamptzString?
+  completedAt         TimestamptzString?
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson              Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Project {
+  id              String      @id
+  number          String      @unique
+  numberVariant   ArtVariant
+  tagLabel        String
+  tagVariant      PillVariant
+  title           String
+  description     String
+  progressPercent Int?
+  statusLabel     String
+}
+
+model RouteSectionLabel {
+  routePath String @id
+  label     String
 }
